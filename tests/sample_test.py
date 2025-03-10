@@ -2,4 +2,4 @@ from __future__ import annotations
 
 
 def test_sample() -> None:
-    assert 1 == 1
+    assert True

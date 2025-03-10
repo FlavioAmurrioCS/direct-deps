@@ -65,7 +65,7 @@ def get_imports(files: list[str]) -> set[str]:
     return {line.split()[1].split(".")[0] for line in _get_import_lines(files)}
 
 
-# TODO: Do some file filtering
+# NOTE: Do some file filtering
 def get_python_files(project_dir: str) -> list[str]:
     import subprocess
 
