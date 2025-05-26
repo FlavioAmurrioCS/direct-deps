@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "direct-deps"
 dynamic = ["version"]
-description = 'A utility to analyze a Python project and its virtual environment to identify unused direct dependencies. Helps you keep your dependency list lean and accurate.'
+description = "A utility to analyze a Python project and its virtual environment to identify unused direct dependencies. Helps you keep your dependency list lean and accurate."
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
@@ -21,10 +21,18 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = [
+dependencies = []
+
+[project.optional-dependencies]
+types = [
+]
+tests = [
+  "direct-deps[types]",
 ]
 
 [project.urls]
@@ -35,30 +43,54 @@ Source = "https://github.com/FlavioAmurrioCS/direct-deps"
 [project.scripts]
 direct-deps = "direct_deps.__main__:main"
 
+###############################################################################
+# region: hatch
+###############################################################################
 [tool.hatch.version]
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "src/direct_deps/_version.py"
 
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+  "direct-deps[tests]",
+]
+
 [tool.hatch.envs.types]
 extra-dependencies = [
   "mypy>=1.0.0",
+  "direct-deps[types]",
 ]
+
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/direct_deps tests}"
+###############################################################################
+# endregion: hatch
+###############################################################################
 
+###############################################################################
+# region: uv
+###############################################################################
+[tool.uv.pip]
+index-url = "https://pypi.org/simple"
+###############################################################################
+# endregion: uv
+###############################################################################
+
+###############################################################################
+# region: coverage
+###############################################################################
 [tool.coverage.run]
 source_pkgs = ["direct_deps", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/direct_deps/__about__.py",
 ]
 
 [tool.coverage.paths]
-direct_deps = ["src/direct_deps", "*/direct-deps/src/direct_deps"]
-tests = ["tests", "*/direct-deps/tests"]
+direct_deps = ["src/direct_deps"]
+tests = ["tests"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -66,14 +98,22 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+###############################################################################
+# endregion: coverage
+###############################################################################
 
-# COMMON SETTINGS BELOW
-[tool.hatch.envs.hatch-static-analysis]
-config-path = "none"
-
+###############################################################################
+# region: pyright
+###############################################################################
 [tool.pyright]
 pythonVersion = "3.8"
+###############################################################################
+# endregion: pyright
+###############################################################################
 
+###############################################################################
+# region: mypy
+###############################################################################
 [tool.mypy]
 python_version = "3.8"
 check_untyped_defs = true
@@ -83,7 +123,18 @@ disallow_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
+###############################################################################
+# endregion: mypy
+###############################################################################
 
+###############################################################################
+# region: ruff
+###############################################################################
+[tool.hatch.envs.hatch-static-analysis]
+config-path = "none"
+
+[tool.ruff.lint.isort]
+force-single-line = true
 
 [tool.ruff]
 line-length = 100
@@ -94,34 +145,22 @@ select = [
 ]
 ignore = [
   "COM812", # missing-trailing-comma
-  "D100",   # undocumented-public-module
-  "D101",   # undocumented-public-class
-  "D102",   # undocumented-public-method
-  "D103",   # undocumented-public-function
-  "D104",   # undocumented-public-package
-  "D105",   # undocumented-magic-method
-  "D107",   # undocumented-public-init
+  "D",      # pydocstyle
   "ERA001", # commented-out-code
-  "I",      # isort # DO NOT ENABLE https://github.com/astral-sh/ruff/issues/4670
+  "EXE003", # shebang-missing-python
   "ISC001", # single-line-implicit-string-concatenation
-  "PGH003", # blanket-type-ignore
-  "PTH",    # flake8-use-pathlib # DO NOT ENABLE, we prefere non pathlib
-  "T20",    # flake8-print # DO NOT ENABLE, we use prints
-  "D203",   # one-blank-line-before-class
-  "D212",   # multi-line-summary-first-line
-  "D401",   # non-imperative-mood
-  "D417",
+  "PTH",    # flake8-use-pathlib
+  "T20",    # flake8-print
 ]
 
 [tool.ruff.format]
 docstring-code-format = true
 docstring-code-line-length = 100
 
-# https://github.com/astral-sh/ruff/issues/4368
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = [
-  "S101",    # assert
-  "E501",    # line-too-long
-  "INP001",  # implicit-namespace-package
-  "PLR2004",
+  "S101",
 ]
+###############################################################################
+# endregion: ruff
+###############################################################################
