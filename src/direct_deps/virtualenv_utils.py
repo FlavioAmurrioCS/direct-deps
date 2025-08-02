@@ -19,7 +19,7 @@ def current_virtual_environment() -> str | None:
 
 def get_hatch_env() -> str | None:
     if os.path.isfile("pyproject.toml"):
-        result = subprocess.run(  # noqa: S603
+        result = subprocess.run(  # noqa: RUF100, S603
             ("hatch", "env", "find", "hatch-test"), capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
@@ -32,9 +32,7 @@ def get_hatch_env() -> str | None:
 
 def get_pipenv_virtualenv() -> str | None:
     if os.path.isfile("Pipfile"):
-        result = subprocess.run(  # noqa: S603
-            ("pipenv", "--venv"), capture_output=True, text=True, check=False
-        )
+        result = subprocess.run(("pipenv", "--venv"), capture_output=True, text=True, check=False)  # noqa: RUF100, S603
         if result.returncode == 0:
             logger.info("Using Pipenv virtual environment: %s", result.stdout.strip())
             return result.stdout.strip()
