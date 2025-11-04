@@ -45,8 +45,7 @@ def get_lookup_table(venv: str | None) -> dict[str, DistributionMetadata]:
 
 
 def get_direct_dependencies(python_files: Iterable[str], venv: str | None) -> set[str]:
-    site_packages = get_site_packages(venv)
-    packages_lookup = get_dependency_lookup_table(site_packages)
+    packages_lookup = get_lookup_table(venv )
     imports = extract_top_level_imports_from_files(python_files)
 
     packages: set[str] = set()
@@ -215,7 +214,3 @@ def main(argv: ArgV = None) -> int:
 if __name__ == "__main__":
     __PROG__ = "python3 -m direct_deps"
     raise SystemExit(main2())
-
-# One command to take in files top level imports
-# One command to take in import name and return package name from virtualenv
-# One command to take in files name
