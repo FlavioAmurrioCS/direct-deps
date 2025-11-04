@@ -17,19 +17,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger("direct-deps")
 
 
-def get_python_files(paths: Iterable[str]) -> Generator[str]:
+def get_python_files(paths: Iterable[str], *, include_jupyter: bool = False) -> Generator[str]:
     for path in paths:
-        path = os.path.realpath(path)  # noqa: PLW2901
-        if os.path.isfile(path):
-            yield path
-        elif os.path.isdir(path):
+        abs_path = os.path.realpath(path)
+        if os.path.isfile(abs_path):
+            yield abs_path
+        elif os.path.isdir(abs_path):
             yield from (
                 x.as_posix()
-                for x in Path(path).rglob("*.py")
+                for x in Path(abs_path).rglob("*.py")
                 if "site-packages" not in x.as_posix()
             )
+            if include_jupyter:
+                yield from (
+                    x.as_posix()
+                    for x in Path(abs_path).rglob("*.ipynb")
+                    if "site-packages" not in x.as_posix()
+                )
         else:
-            logger.info("Path does not exist: %s", path)
+            logger.info("Path does not exist: %s", abs_path)
 
 
 # # NOTE: Do some file filtering
