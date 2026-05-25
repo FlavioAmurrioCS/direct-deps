@@ -45,7 +45,7 @@ def get_lookup_table(venv: str | None) -> dict[str, DistributionMetadata]:
 
 
 def get_direct_dependencies(python_files: Iterable[str], venv: str | None) -> set[str]:
-    packages_lookup = get_lookup_table(venv )
+    packages_lookup = get_lookup_table(venv)
     imports = extract_top_level_imports_from_files(python_files)
 
     packages: set[str] = set()
@@ -120,7 +120,7 @@ class Imports(NamedTuple):
     @staticmethod
     def arg_parser(parser: argparse.ArgumentParser | None = None) -> argparse.ArgumentParser:
         parser = parser or argparse.ArgumentParser()
-        parser.description = "Extract top-level imports from Python files."  # pyrefly: ignore[implicitly-defined-attribute]  # noqa: E501
+        parser.description = "Extract top-level imports from Python files."  # pyrefly: ignore[implicitly-defined-attribute]
         parser.add_argument("files", nargs="+", help="List of Python files to analyze.")
         parser.add_argument(
             "--include-jupyter",
