@@ -3,6 +3,7 @@ from __future__ import annotations
 import glob
 import logging
 import os
+import shutil
 import site
 import subprocess
 
@@ -18,21 +19,24 @@ def current_virtual_environment() -> str | None:
 
 
 def get_hatch_env() -> str | None:
-    if os.path.isfile("pyproject.toml"):
-        result = subprocess.run(  # noqa: RUF100, S603
-            ("hatch", "env", "find", "hatch-test"), capture_output=True, text=True, check=False
+    if os.path.isfile("pyproject.toml") and shutil.which("hatch"):
+        result = subprocess.run(
+            ("hatch", "env", "find", "hatch-test"),  # noqa: RUF100, S603, S607
+            capture_output=True,
+            text=True,
+            check=False,
         )
         if result.returncode == 0:
-            ret = next(filter(os.path.isdir, result.stdout.splitlines()), None)
-            if ret:
-                logger.info("Using Hatch virtual environment: %s", ret)
-                return ret
+            for line in result.stdout.splitlines():
+                if os.path.isdir(line):
+                    logger.info("Using Hatch virtual environment: %s", line)
+                    return line
     return None
 
 
 def get_pipenv_virtualenv() -> str | None:
-    if os.path.isfile("Pipfile"):
-        result = subprocess.run(("pipenv", "--venv"), capture_output=True, text=True, check=False)  # noqa: RUF100, S603
+    if os.path.isfile("Pipfile") and shutil.which("pipenv"):
+        result = subprocess.run(("pipenv", "--venv"), capture_output=True, text=True, check=False)  # noqa: RUF100, S603, S607
         if result.returncode == 0:
             logger.info("Using Pipenv virtual environment: %s", result.stdout.strip())
             return result.stdout.strip()

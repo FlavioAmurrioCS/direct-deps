@@ -3,7 +3,7 @@
   "package_name": "direct-deps",
   "module_name": "direct_deps",
   "project_short_description": "A utility to analyze a Python project and its virtual environment to identify unused direct dependencies. Helps you keep your dependency list lean and accurate.",
-  "minimum_python_version": "3.9",
+  "minimum_python_version": "3.10",
   "full_name": "Flavio Amurrio",
   "email": "25621374+FlavioAmurrioCS@users.noreply.github.com",
   "github_username": "FlavioAmurrioCS",

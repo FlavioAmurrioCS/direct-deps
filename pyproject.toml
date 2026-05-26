@@ -1,3 +1,4 @@
+#:schema https://www.schemastore.org/pyproject.json
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
@@ -7,7 +8,7 @@ name = "direct-deps"
 dynamic = ["version"]
 description = "A utility to analyze a Python project and its virtual environment to identify unused direct dependencies. Helps you keep your dependency list lean and accurate."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = []
 authors = [
@@ -16,7 +17,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -29,17 +29,32 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tests = [
+
+[dependency-groups]
+dev = [
+  { include-group = "test" },
+  { include-group = "types" },
+]
+test = [
   "pytest",
+  "pytest-cov",
   "tomli ; python_version < '3.11'",
 ]
 types = [
-  "direct-deps[tests]",
-  "typing-extensions",
+  { include-group = "test" },
   "mypy",
+  "typing-extensions",
+]
+type-checkers = [
+  { include-group = "types" },
+  "basedpyright",
   "pyrefly",
   "pyright[nodejs]",
   "ty",
+  "zuban",
+]
+docs = [
+  "zensical",
 ]
 
 [project.urls]
@@ -48,8 +63,8 @@ Issues = "https://github.com/FlavioAmurrioCS/direct-deps/issues"
 Source = "https://github.com/FlavioAmurrioCS/direct-deps"
 
 [project.scripts]
-direct-deps = "direct_deps.__main__:main"
-direct-deps-beta = "direct_deps.__main__:main2"
+direct-deps = "direct_deps.cli_beta:main"
+old-direct-deps = "direct_deps.cli:main"
 
 ###############################################################################
 # region: hatch
@@ -61,14 +76,13 @@ source = "vcs"
 version-file = "src/direct_deps/_version.py"
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = [
-  "direct-deps[tests]",
+dependency-groups = [
+  "test",
 ]
 
 [tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
-  "direct-deps[types]",
+dependency-groups = [
+  "types",
 ]
 
 [tool.hatch.envs.types.scripts]
@@ -76,7 +90,6 @@ check = "mypy --install-types --non-interactive {args:src/direct_deps tests}"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = [
-  "3.9",
   "3.10",
   "3.11",
   "3.12",
@@ -88,15 +101,6 @@ python = [
 ###############################################################################
 
 ###############################################################################
-# region: uv
-###############################################################################
-[tool.uv.pip]
-index-url = "https://pypi.org/simple"
-###############################################################################
-# endregion: uv
-###############################################################################
-
-###############################################################################
 # region: coverage
 ###############################################################################
 [tool.coverage.run]
@@ -104,6 +108,8 @@ source_pkgs = ["direct_deps", "tests"]
 branch = true
 parallel = true
 omit = [
+  "**/_version.py",
+  "**/__main__.py",
 ]
 
 [tool.coverage.paths]
@@ -118,31 +124,6 @@ exclude_lines = [
 ]
 ###############################################################################
 # endregion: coverage
-###############################################################################
-
-###############################################################################
-# region: pyright
-###############################################################################
-[tool.pyright]
-pythonVersion = "3.9"
-###############################################################################
-# endregion: pyright
-###############################################################################
-
-###############################################################################
-# region: mypy
-###############################################################################
-[tool.mypy]
-python_version = "3.9"
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-###############################################################################
-# endregion: mypy
 ###############################################################################
 
 ###############################################################################
@@ -182,4 +163,36 @@ docstring-code-line-length = 100
 ]
 ###############################################################################
 # endregion: ruff
+###############################################################################
+
+###############################################################################
+# region: type-checkers
+###############################################################################
+[tool.mypy]
+# https://mypy.readthedocs.io/en/stable/config_file.html
+strict = true
+
+[tool.zuban]
+# https://docs.zubanls.com/en/latest/usage.html#configuration
+mode = "default"
+strict = true
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+typeCheckingMode = "strict"
+reportUnusedImport = false
+
+# [tool.basedpyright]
+# # https://docs.basedpyright.com/latest/configuration/config-files/
+# typeCheckingMode = "all"
+
+[tool.pyrefly]
+# https://pyrefly.org/en/docs/configuration/
+preset = "strict"
+
+[tool.ty.rules]
+# https://docs.astral.sh/ty/reference/configuration/
+all = "error"
+###############################################################################
+# endregion: type-checkers
 ###############################################################################

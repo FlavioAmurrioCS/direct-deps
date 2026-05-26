@@ -180,3 +180,5 @@ temp/
 
 uv.lock
 requirements.txt
+CLAUDE.md
+AGENTS.md

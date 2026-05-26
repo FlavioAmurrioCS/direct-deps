@@ -90,18 +90,16 @@ def get_top_level_imports(filename: str) -> list[str]:
 
 
 @lru_cache(maxsize=1)
-def builtin_module_names() -> set[str]:
+def builtin_module_names() -> frozenset[str]:
     """Get the set of built-in module names."""
-    if sys.version_info >= (3, 10):
-        return sys.stdlib_module_names  # type: ignore[attr-defined]
-    return set()
+    return sys.stdlib_module_names
 
 
 def extract_top_level_imports_from_files(
     files: Iterable[str], *, include_builtin: bool = False
 ) -> Generator[str]:
     """Extract unique top-level imports from a list of Python files."""
-    seen = set()
+    seen: set[str] = set()
     for file in files:
         logger.debug("Extracting imports from file: %s", file)
         for imp in get_top_level_imports(file):

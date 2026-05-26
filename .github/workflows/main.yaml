@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+---
 name: main
 
 on:
@@ -11,11 +13,11 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
         platform:
           - ubuntu-latest
           # - macos-latest
@@ -24,14 +26,13 @@ jobs:
     env:
       UV_PYTHON: ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Install the project
-        run: uv sync --extra tests
-        # run: uv sync --locked --all-extras --dev
+        run: uv sync
 
       - name: Run tests
         run: uv run pytest tests
@@ -42,16 +43,16 @@ jobs:
       - test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv and set the python version
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Build package
         run: uv build
 
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-package-distributions
           path: dist/
@@ -68,7 +69,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -88,12 +89,12 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
       - name: Sign the dists with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        uses: sigstore/gh-action-sigstore-python@v3.3.0
         with:
           inputs: >-
             ./dist/*.tar.gz

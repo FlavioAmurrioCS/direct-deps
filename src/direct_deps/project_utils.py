@@ -8,8 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Generator
     from collections.abc import Iterable
-
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     ArgV: TypeAlias = "list[str] | tuple[str,...] | None"
 

@@ -47,7 +47,7 @@ def _get_dist_info_dirs(site_packages_dirs: list[str]) -> list[str]:
 
 
 def get_dependency_lookup_table(site_packages_dirs: list[str]) -> dict[str, DistributionMetadata]:
-    ret = {}
+    ret: dict[str, DistributionMetadata] = {}
     for dist_info_dir in _get_dist_info_dirs(site_packages_dirs):
         p = DistributionMetadata.from_dist_info_dir(dist_info_dir)
         for top_level in p.top_level:
