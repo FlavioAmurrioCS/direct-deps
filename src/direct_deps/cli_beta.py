@@ -6,7 +6,6 @@ from textwrap import dedent
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
-from direct_deps._version import version
 from direct_deps.distribution_metadata import get_dependency_lookup_table
 from direct_deps.import_analyzer import extract_top_level_imports_from_files
 from direct_deps.project_utils import get_python_files
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
         def run(self) -> int: ...
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("direct-deps")
 
 
 def get_lookup_table(venv: str | None) -> dict[str, DistributionMetadata]:
@@ -186,7 +185,16 @@ SUB_COMMANDS: dict[str, type[Cmd]] = {
     "find-package": PackageFinderCmd,
 }
 
-VERSION = version
+
+def get_version() -> str:
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as _pkg_version
+
+    try:
+        return _pkg_version("direct-deps")
+    except PackageNotFoundError:
+        return "0.0.0+unknown"
+
 
 __prog__ = None
 
@@ -219,7 +227,7 @@ def main(argv: list[str] | tuple[str, ...] | None = None) -> int:
         "-V",
         "--version",
         action="version",
-        version=f"%(prog)s {VERSION}",
+        version=f"%(prog)s {get_version()}",
     )
 
     subparsers = parser.add_subparsers(dest="command")

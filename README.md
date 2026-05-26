@@ -77,20 +77,18 @@ To split packages and dev-packages you can do the following.
 
 ```bash
 $ uvx direct-deps check src
-Direct Dependencies:
- - persistent-cache-decorator
- - requests
- - rich
- - setuptools-scm
- - typedfzf
- - typer
+persistent-cache-decorator
+requests
+rich
+setuptools-scm
+typedfzf
+typer
 
 $ uvx direct-deps check tests
-Direct Dependencies:
- - pytest
- - runtool
- - tomlkit
- - typer
+pytest
+runtool
+tomlkit
+typer
 
 # So my [project.dependencies] would be:
 [project]

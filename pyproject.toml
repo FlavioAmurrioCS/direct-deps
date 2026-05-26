@@ -37,6 +37,7 @@ dev = [
 ]
 test = [
   "pytest",
+  "pytest-cov",
   "tomli ; python_version < '3.11'",
 ]
 types = [
@@ -107,6 +108,8 @@ source_pkgs = ["direct_deps", "tests"]
 branch = true
 parallel = true
 omit = [
+  "**/_version.py",
+  "**/__main__.py",
 ]
 
 [tool.coverage.paths]
