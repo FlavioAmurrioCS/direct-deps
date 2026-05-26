@@ -99,7 +99,7 @@ def extract_top_level_imports_from_files(
     files: Iterable[str], *, include_builtin: bool = False
 ) -> Generator[str]:
     """Extract unique top-level imports from a list of Python files."""
-    seen = set()
+    seen: set[str] = set()
     for file in files:
         logger.debug("Extracting imports from file: %s", file)
         for imp in get_top_level_imports(file):

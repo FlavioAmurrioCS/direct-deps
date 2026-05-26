@@ -1,3 +1,4 @@
+#:schema https://www.schemastore.org/pyproject.json
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
@@ -28,17 +29,31 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tests = [
+
+[dependency-groups]
+dev = [
+  { include-group = "test" },
+  { include-group = "types" },
+]
+test = [
   "pytest",
   "tomli ; python_version < '3.11'",
 ]
 types = [
-  "direct-deps[tests]",
-  "typing-extensions",
+  { include-group = "test" },
   "mypy",
+  "typing-extensions",
+]
+type-checkers = [
+  { include-group = "types" },
+  "basedpyright",
   "pyrefly",
   "pyright[nodejs]",
   "ty",
+  "zuban",
+]
+docs = [
+  "zensical",
 ]
 
 [project.urls]
@@ -60,14 +75,13 @@ source = "vcs"
 version-file = "src/direct_deps/_version.py"
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = [
-  "direct-deps[tests]",
+dependency-groups = [
+  "test",
 ]
 
 [tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
-  "direct-deps[types]",
+dependency-groups = [
+  "types",
 ]
 
 [tool.hatch.envs.types.scripts]
@@ -83,15 +97,6 @@ python = [
 ]
 ###############################################################################
 # endregion: hatch
-###############################################################################
-
-###############################################################################
-# region: uv
-###############################################################################
-[tool.uv.pip]
-index-url = "https://pypi.org/simple"
-###############################################################################
-# endregion: uv
 ###############################################################################
 
 ###############################################################################
@@ -116,31 +121,6 @@ exclude_lines = [
 ]
 ###############################################################################
 # endregion: coverage
-###############################################################################
-
-###############################################################################
-# region: pyright
-###############################################################################
-[tool.pyright]
-pythonVersion = "3.10"
-###############################################################################
-# endregion: pyright
-###############################################################################
-
-###############################################################################
-# region: mypy
-###############################################################################
-[tool.mypy]
-python_version = "3.10"
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-###############################################################################
-# endregion: mypy
 ###############################################################################
 
 ###############################################################################
@@ -180,4 +160,36 @@ docstring-code-line-length = 100
 ]
 ###############################################################################
 # endregion: ruff
+###############################################################################
+
+###############################################################################
+# region: type-checkers
+###############################################################################
+[tool.mypy]
+# https://mypy.readthedocs.io/en/stable/config_file.html
+strict = true
+
+[tool.zuban]
+# https://docs.zubanls.com/en/latest/usage.html#configuration
+mode = "default"
+strict = true
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+typeCheckingMode = "strict"
+reportUnusedImport = false
+
+# [tool.basedpyright]
+# # https://docs.basedpyright.com/latest/configuration/config-files/
+# typeCheckingMode = "all"
+
+[tool.pyrefly]
+# https://pyrefly.org/en/docs/configuration/
+preset = "strict"
+
+[tool.ty.rules]
+# https://docs.astral.sh/ty/reference/configuration/
+all = "error"
+###############################################################################
+# endregion: type-checkers
 ###############################################################################

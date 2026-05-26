@@ -3,6 +3,7 @@ from __future__ import annotations
 import glob
 import logging
 import os
+import shutil
 import site
 import subprocess
 
@@ -18,7 +19,7 @@ def current_virtual_environment() -> str | None:
 
 
 def get_hatch_env() -> str | None:
-    if os.path.isfile("pyproject.toml"):
+    if os.path.isfile("pyproject.toml") and shutil.which("hatch"):
         result = subprocess.run(
             ("hatch", "env", "find", "hatch-test"),  # noqa: RUF100, S603, S607
             capture_output=True,
@@ -26,10 +27,10 @@ def get_hatch_env() -> str | None:
             check=False,
         )
         if result.returncode == 0:
-            ret = next(filter(os.path.isdir, result.stdout.splitlines()), None)
-            if ret:
-                logger.info("Using Hatch virtual environment: %s", ret)
-                return ret
+            for line in result.stdout.splitlines():
+                if os.path.isdir(line):
+                    logger.info("Using Hatch virtual environment: %s", line)
+                    return line
     return None
 
 

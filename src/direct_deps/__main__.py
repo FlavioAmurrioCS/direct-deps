@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger("direct-deps")
 
 
-__PROG__ = None
+__prog__ = None
 
 
 def get_lookup_table(venv: str | None) -> dict[str, DistributionMetadata]:
@@ -144,7 +144,7 @@ class Imports(NamedTuple):
 
 def main2(argv: ArgV = None) -> int:
     parser = argparse.ArgumentParser(
-        prog=__PROG__,
+        prog=__prog__,
         description="Tool to analyze direct dependencies of Python projects.",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog=dedent("""\
@@ -183,7 +183,7 @@ class CLI(NamedTuple):
     @classmethod
     def parse_args(cls, argv: ArgV = None) -> CLI:
         parser = argparse.ArgumentParser(
-            prog=__PROG__, description="Find the direct dependencies of a Python project."
+            prog=__prog__, description="Find the direct dependencies of a Python project."
         )
         parser.add_argument(
             "file_or_dir", nargs="+", help="Python files or directories to analyze."
@@ -193,7 +193,7 @@ class CLI(NamedTuple):
             type=str,
             help="The virtualenv directory to analyze.",
         )
-        args: CLI = parser.parse_args(argv)  # type: ignore[assignment]
+        args: CLI = parser.parse_args(argv)  # type: ignore[assignment]  # ty:ignore[invalid-assignment]
 
         return cls(venv=args.venv, file_or_dir=args.file_or_dir)
 
@@ -212,5 +212,5 @@ def main(argv: ArgV = None) -> int:
 
 
 if __name__ == "__main__":
-    __PROG__ = "python3 -m direct_deps"
+    __prog__ = "python3 -m direct_deps"
     raise SystemExit(main2())
