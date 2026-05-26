@@ -90,11 +90,9 @@ def get_top_level_imports(filename: str) -> list[str]:
 
 
 @lru_cache(maxsize=1)
-def builtin_module_names() -> set[str]:
+def builtin_module_names() -> frozenset[str]:
     """Get the set of built-in module names."""
-    if sys.version_info >= (3, 10):
-        return sys.stdlib_module_names  # type: ignore[attr-defined]
-    return set()
+    return sys.stdlib_module_names
 
 
 def extract_top_level_imports_from_files(
