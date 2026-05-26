@@ -6,6 +6,7 @@ from textwrap import dedent
 from typing import TYPE_CHECKING
 from typing import NamedTuple
 
+from direct_deps._version import version
 from direct_deps.distribution_metadata import get_dependency_lookup_table
 from direct_deps.import_analyzer import extract_top_level_imports_from_files
 from direct_deps.project_utils import get_python_files
@@ -33,9 +34,9 @@ def get_lookup_table(venv: str | None) -> dict[str, DistributionMetadata]:
 
 
 class CheckCmd(NamedTuple):
-    """Analyze Python files and print the direct dependencies."""
+    """Print a project's direct dependencies (distribution names, one per line, sorted)."""
 
-    files: list[str]
+    paths: list[str]
     include_jupyter: bool = False
     venv: str | None = None
 
@@ -44,21 +45,37 @@ class CheckCmd(NamedTuple):
         parser = parser or argparse.ArgumentParser()
         parser.description = cls.__doc__ or "<PLACEHOLDER_DESCRIPTION>"
         parser.formatter_class = argparse.RawTextHelpFormatter
-        # parser.epilog = dedent("""\
-        # Example:
-        #   %(prog)s <PLACEHOLDER_EXAMPLE>
-        # """)
-        parser.add_argument("files", nargs="+", help="List of Python files to analyze.")
+        parser.epilog = dedent("""\
+        Examples:
+          %(prog)s .
+          %(prog)s src
+          %(prog)s tests --venv ./.venv
+        """)
+        parser.add_argument(
+            "paths",
+            nargs="+",
+            help=(
+                "Python files or directories to analyze. Directories are scanned "
+                "recursively for .py files (and .ipynb with --include-jupyter), "
+                "skipping anything under site-packages."
+            ),
+        )
         parser.add_argument(
             "--include-jupyter",
             action="store_true",
             help="Include Jupyter notebook files when scanning directories.",
         )
-        parser.add_argument("--venv", help="Path to the virtual environment.")
+        parser.add_argument(
+            "--venv",
+            help=(
+                "Path to the virtual environment to inspect. Optional; if omitted, "
+                "auto-detected in order: $VIRTUAL_ENV, ./.venv, ./venv, Hatch, Pipenv."
+            ),
+        )
         return parser
 
     def run(self) -> int:
-        files = list(get_python_files(self.files, include_jupyter=self.include_jupyter))
+        files = list(get_python_files(self.paths, include_jupyter=self.include_jupyter))
         imports = extract_top_level_imports_from_files(files, include_builtin=False)
         table = get_lookup_table(self.venv)
         items: list[str] = []
@@ -73,7 +90,7 @@ class CheckCmd(NamedTuple):
 
 
 class PackageFinderCmd(NamedTuple):
-    """Lookup and print the package name for the specified imports."""
+    """Resolve import/module names to the distribution names that provide them."""
 
     imports: list[str]
     venv: str | None = None
@@ -83,12 +100,22 @@ class PackageFinderCmd(NamedTuple):
         parser = parser or argparse.ArgumentParser()
         parser.description = cls.__doc__ or "<PLACEHOLDER_DESCRIPTION>"
         parser.formatter_class = argparse.RawTextHelpFormatter
-        # parser.epilog = dedent("""\
-        # Example:
-        #   %(prog)s <PLACEHOLDER_EXAMPLE>
-        # """)
-        parser.add_argument("imports", nargs="+", help="List of imports to look up.")
-        parser.add_argument("--venv", help="Path to the virtual environment.")
+        parser.epilog = dedent("""\
+        Examples:
+          %(prog)s requests yaml --venv ./.venv
+        """)
+        parser.add_argument(
+            "imports",
+            nargs="+",
+            help="Import/module names to look up (e.g. 'yaml'), not package names.",
+        )
+        parser.add_argument(
+            "--venv",
+            help=(
+                "Path to the virtual environment to inspect. Optional; if omitted, "
+                "auto-detected in order: $VIRTUAL_ENV, ./.venv, ./venv, Hatch, Pipenv."
+            ),
+        )
         return parser
 
     def run(self) -> int:
@@ -107,7 +134,7 @@ class PackageFinderCmd(NamedTuple):
 class ExtractImportsCmd(NamedTuple):
     """Extract and print all top-level imports from the specified Python files."""
 
-    files: list[str]
+    paths: list[str]
     include_jupyter: bool = False
     include_builtin: bool = False
 
@@ -116,11 +143,20 @@ class ExtractImportsCmd(NamedTuple):
         parser = parser or argparse.ArgumentParser()
         parser.description = cls.__doc__ or "<PLACEHOLDER_DESCRIPTION>"
         parser.formatter_class = argparse.RawTextHelpFormatter
-        # parser.epilog = dedent("""\
-        # Example:
-        #   %(prog)s <PLACEHOLDER_EXAMPLE>
-        # """)
-        parser.add_argument("files", nargs="+", help="List of Python files to analyze.")
+        parser.epilog = dedent("""\
+        Examples:
+          %(prog)s src/main.py src
+          %(prog)s notebook.ipynb --include-jupyter
+        """)
+        parser.add_argument(
+            "paths",
+            nargs="+",
+            help=(
+                "Python files or directories to analyze. Directories are scanned "
+                "recursively for .py files (and .ipynb with --include-jupyter), "
+                "skipping anything under site-packages."
+            ),
+        )
         parser.add_argument(
             "--include-jupyter",
             action="store_true",
@@ -132,7 +168,7 @@ class ExtractImportsCmd(NamedTuple):
         return parser
 
     def run(self) -> int:
-        files = list(get_python_files(self.files, include_jupyter=self.include_jupyter))
+        files = list(get_python_files(self.paths, include_jupyter=self.include_jupyter))
         for imp in extract_top_level_imports_from_files(
             files, include_builtin=self.include_builtin
         ):
@@ -150,7 +186,7 @@ SUB_COMMANDS: dict[str, type[Cmd]] = {
     "find-package": PackageFinderCmd,
 }
 
-VERSION = "0.1.0"
+VERSION = version
 
 __prog__ = None
 
@@ -158,7 +194,16 @@ __prog__ = None
 def main(argv: list[str] | tuple[str, ...] | None = None) -> int:
     parser = argparse.ArgumentParser(prog=__prog__)
     parser.description = dedent("""\
-        Tool to analyze direct dependencies of Python projects.
+        Report a Python project's direct (first-party imported) dependencies as
+        distribution names, one per line.
+
+        Each top-level import found in your source is mapped to the distribution
+        that provides it by reading the installed virtual environment's *.dist-info
+        metadata, so the project's venv must be populated. Imports with no matching
+        installed distribution are skipped.
+
+        Note: tools that are not imported in your source (e.g. ruff, pytest-cov,
+        pre-commit) will not be detected.
     """).rstrip()
     parser.formatter_class = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=30)
     parser.epilog = dedent("""\

@@ -13,8 +13,9 @@
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Usage](#usage)
-    - [Run without installation (Recommended)](#run-without-installation-recommended)
-    - [Recommendation](#recommendation)
+    - [`check` (primary)](#check-primary)
+    - [`extract-imports`](#extract-imports)
+    - [`find-package`](#find-package)
   - [Limitations](#limitations)
   - [License](#license)
 
@@ -41,8 +42,14 @@ uv tool install direct-deps
 
 ## Usage
 
-### Run without installation (Recommended)
-The easiest way to use `direct-deps` is to run it directly without installation. The tool will automatically detect your project's virtual environment:
+`direct-deps` exposes three subcommands — `check`, `extract-imports`, and `find-package`.
+The recommended way to run any of them is without installation via `uvx` or `pipx run`.
+Every command accepts one or more **files or directories** (directories are scanned
+recursively).
+
+### `check` (primary)
+The main command: it lists your project's direct dependencies. Run it directly without
+installation — the tool will automatically detect your project's virtual environment:
 
 ```bash
 # Using uvx (uv's tool runner)
@@ -56,7 +63,6 @@ uvx direct-deps check src
 uvx direct-deps check tests
 ```
 
-### Recommendation
 To split packages and dev-packages you can do the following.
 
 ```bash
@@ -104,6 +110,32 @@ dev = [
   "runtool",
   "tomlkit",
 ]
+```
+
+### `extract-imports`
+Lists every unique top-level import found in the given files or directories. This is the
+raw input that `check` resolves against your environment, so it's useful for debugging what
+the tool actually detected. Standard-library modules are excluded by default (pass
+`--include-builtin` to include them, and `--include-jupyter` to scan notebooks).
+
+```bash
+$ uvx direct-deps extract-imports src
+persistent_cache_decorator
+requests
+rich
+typedfzf
+typer
+```
+
+### `find-package`
+Resolves one or more import/module names to the distribution (package) names that provide
+them, using your environment's metadata. Handy when an import name differs from its PyPI
+package name (e.g. `yaml` is provided by `PyYAML`).
+
+```bash
+$ uvx direct-deps find-package yaml requests
+PyYAML
+requests
 ```
 
 ## Limitations
