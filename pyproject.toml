@@ -62,8 +62,8 @@ Issues = "https://github.com/FlavioAmurrioCS/direct-deps/issues"
 Source = "https://github.com/FlavioAmurrioCS/direct-deps"
 
 [project.scripts]
-direct-deps = "direct_deps.__main__:main"
-direct-deps-beta = "direct_deps.__main__:main2"
+direct-deps = "direct_deps.cli_beta:main"
+old-direct-deps = "direct_deps.cli:main"
 
 ###############################################################################
 # region: hatch

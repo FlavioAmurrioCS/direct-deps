@@ -34,6 +34,9 @@ Installation is optional! You can run `direct-deps` without installing it using 
 ```console
 # Optional: Install globally
 pipx install direct-deps
+
+# or
+uv tool install direct-deps
 ```
 
 ## Usage
@@ -43,14 +46,14 @@ The easiest way to use `direct-deps` is to run it directly without installation.
 
 ```bash
 # Using uvx (uv's tool runner)
-uvx direct-deps .
+uvx direct-deps check .
 
 # Using pipx
-pipx run direct-deps .
+pipx run direct-deps check .
 
 # Or analyze specific directories
-uvx direct-deps src
-uvx direct-deps tests
+uvx direct-deps check src
+uvx direct-deps check tests
 ```
 
 ### Recommendation
@@ -67,7 +70,7 @@ To split packages and dev-packages you can do the following.
 ```
 
 ```bash
-$ uvx direct-deps src
+$ uvx direct-deps check src
 Direct Dependencies:
  - persistent-cache-decorator
  - requests
@@ -76,7 +79,7 @@ Direct Dependencies:
  - typedfzf
  - typer
 
-$ uvx direct-deps tests
+$ uvx direct-deps check tests
 Direct Dependencies:
  - pytest
  - runtool

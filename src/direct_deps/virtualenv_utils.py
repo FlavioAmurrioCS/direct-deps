@@ -35,7 +35,7 @@ def get_hatch_env() -> str | None:
 
 
 def get_pipenv_virtualenv() -> str | None:
-    if os.path.isfile("Pipfile"):
+    if os.path.isfile("Pipfile") and shutil.which("pipenv"):
         result = subprocess.run(("pipenv", "--venv"), capture_output=True, text=True, check=False)  # noqa: RUF100, S603, S607
         if result.returncode == 0:
             logger.info("Using Pipenv virtual environment: %s", result.stdout.strip())
